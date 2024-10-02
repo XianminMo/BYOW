@@ -14,7 +14,7 @@ public class Main {
         World world = new World();
 
         // 添加一个随机房间
-        Random random = new Random(12346);
+        Random random = new Random(12347);
         world.generateRooms(random);
 
         // 渲染世界
