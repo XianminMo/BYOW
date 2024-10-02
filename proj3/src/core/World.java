@@ -30,25 +30,75 @@ public class World {
     }
 
     // 生成多个房间
-    public void generateRooms(Random random, int roomCount) {
-        for (int i = 0; i < roomCount; i++) {
-            addRandomRoom(random); // 随机生成房间
+    public void generateRooms(Random random) {
+        double fillRatio = 0.0;
+        while (fillRatio < 0.5) {
+            addRandomRoom(random);  // 随机生成房间
+            fillRatio = calculateFillRatio();  // 计算填充率
         }
         connectRoomsUsingMST();  // 连接房间
     }
 
+    // 计算当前世界的填充率
+    private double calculateFillRatio() {
+        int usedTiles = 0;
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                if (world[x][y] != Tileset.NOTHING) {
+                    usedTiles++;
+                }
+            }
+        }
+        return (double) usedTiles / (WIDTH * HEIGHT);
+    }
+
+    // 检查两个房间是否重叠
+    private boolean isOverlapping(Room room1, Room room2) {
+        int x1 = room1.getPosition()[0];
+        int y1 = room1.getPosition()[1];
+        int x2 = room2.getPosition()[0];
+        int y2 = room2.getPosition()[1];
+        int width1 = room1.getSize()[0];
+        int height1 = room1.getSize()[1];
+        int width2 = room2.getSize()[0];
+        int height2 = room1.getSize()[1];
+
+        return x1 < x2 + width2 &&
+                x1 + width1 > x2 &&
+                y1 < y2 + height2 &&
+                y1 + height1 > y2;
+    }
+
     // 随机生成房间并添加到世界
     public void addRandomRoom(Random random) {
-        int roomWidth = RandomUtils.uniform(random, 4, 10);  // 随机宽度
-        int roomHeight = RandomUtils.uniform(random, 4, 10); // 随机高度
+        int x = 0;
+        int y = 0;
+        int roomWidth = 0;
+        int roomHeight = 0;
+        Room newRoom = null;
 
-        // 预留边界给墙
-        int x = RandomUtils.uniform(random, 1, WIDTH - roomWidth - 1); // 随机X位置
-        int y = RandomUtils.uniform(random, 1, HEIGHT - roomHeight - 1); // 随机Y位置
+        boolean validRoom = false;
+        while (!validRoom) {
+            roomWidth = RandomUtils.uniform(random, 3, 15);  // 随机宽度
+            roomHeight = RandomUtils.uniform(random, 3, 12); // 随机高度
 
-        // 创建房间类，添加到房间集合
-        Room room = new Room(x, y, roomWidth, roomHeight);
-        rooms.add(room);
+            // 预留边界给墙
+            x = RandomUtils.uniform(random, 1, WIDTH - roomWidth - 1); // 随机X位置
+            y = RandomUtils.uniform(random, 1, HEIGHT - roomHeight - 1); // 随机Y位置
+
+            // 创建房间类，添加到房间集合
+            newRoom = new Room(x, y, roomWidth, roomHeight);
+            validRoom = true;
+
+            // 检查与已有房间是否重叠
+            for (Room existingRoom : rooms) {
+                if (isOverlapping(newRoom, existingRoom)) {
+                    validRoom = false;  // 如果重叠，重新生成房间
+                    break;
+                }
+            }
+        }
+        rooms.add(newRoom);
 
         // 用地板填充房间
         for (int i = x; i < x + roomWidth; i++) {
@@ -94,26 +144,54 @@ public class World {
         }
     }
 
-    // 连接两个房间的随机边缘
+    // 连接两个房间
     private void connectTwoRooms(Room room1, Room room2) {
-        int startX = room1.getCenter()[0];
-        int startY = room1.getCenter()[1];
-        int endX = room2.getCenter()[0];
-        int endY = room2.getCenter()[1];
+        // 随机选择房间的连接点，可以是角点、中心或边界中点
+        int[] room1Pos = chooseRandomPosition(room1);
+        int[] room2Pos = chooseRandomPosition(room2);
 
-        // 连接X轴
+        int startX = room1Pos[0];
+        int startY = room1Pos[1];
+        int endX = room2Pos[0];
+        int endY = room2Pos[1];
+
         for (int x = Math.min(startX, endX); x <= Math.max(startX, endX); x++) {
             world[x][startY] = Tileset.FLOOR;
-            if (world[x][startY - 1] == Tileset.NOTHING) world[x][startY - 1] = Tileset.WALL;
-            if (world[x][startY + 1] == Tileset.NOTHING) world[x][startY + 1] = Tileset.WALL;
+            addWallsAround(x, startY);
         }
-
-        // 连接Y轴
         for (int y = Math.min(startY, endY); y <= Math.max(startY, endY); y++) {
             world[endX][y] = Tileset.FLOOR;
-            if (world[endX - 1][y] == Tileset.NOTHING) world[endX - 1][y] = Tileset.WALL;
-            if (world[endX + 1][y] == Tileset.NOTHING) world[endX + 1][y] = Tileset.WALL;
+            addWallsAround(endX, y);
         }
+    }
+
+    // 在地板周围添加墙壁
+    private void addWallsAround(int x, int y) {
+        if (world[x][y - 1] == Tileset.NOTHING) world[x][y - 1] = Tileset.WALL;
+        if (world[x][y + 1] == Tileset.NOTHING) world[x][y + 1] = Tileset.WALL;
+        if (world[x - 1][y] == Tileset.NOTHING) world[x - 1][y] = Tileset.WALL;
+        if (world[x + 1][y] == Tileset.NOTHING) world[x + 1][y] = Tileset.WALL;
+    }
+
+    private int[] chooseRandomPosition(Room room) {
+        int x1 = room.getPosition()[0];
+        int y1 = room.getPosition()[1];
+        int x2 = x1 + room.getSize()[0] - 1;
+        int y2 = y1 + room.getSize()[1] - 1;
+
+        int[][] positions = {
+                {x1, y1},                    // 左下角
+                {x2, y1},                    // 右下角
+                {x1, y2},                    // 左上角
+                {x2, y2},                    // 右上角
+                room.getCenter(),             // 中心
+                {(x1 + x2) / 2, y1},          // 下边中点
+                {(x1 + x2) / 2, y2},          // 上边中点
+                {x1, (y1 + y2) / 2},          // 左边中点
+                {x2, (y1 + y2) / 2}           // 右边中点
+        };
+        Random random = new Random();
+        return positions[random.nextInt(positions.length)];
     }
 
 

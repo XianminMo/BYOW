@@ -14,8 +14,8 @@ public class Main {
         World world = new World();
 
         // 添加一个随机房间
-        Random random = new Random(12345);
-        world.generateRooms(random, 5);
+        Random random = new Random(12346);
+        world.generateRooms(random);
 
         // 渲染世界
         TETile[][] worldTiles = world.getWorld();

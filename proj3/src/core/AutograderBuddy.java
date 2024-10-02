@@ -3,6 +3,8 @@ package core;
 import tileengine.TETile;
 import tileengine.Tileset;
 
+import java.util.Random;
+
 public class AutograderBuddy {
 
     /**
@@ -18,8 +20,23 @@ public class AutograderBuddy {
      * @return the 2D TETile[][] representing the state of the world
      */
     public static TETile[][] getWorldFromInput(String input) {
+        if (input == null || !input.toUpperCase().startsWith("N") || !input.toUpperCase().endsWith("S")) {
+            throw new IllegalArgumentException("Invalid input format");
+        }
 
-        throw new RuntimeException("Please fill out AutograderBuddy!");
+        // 提取种子
+        String seedString = input.substring(1, input.length() - 1);
+        long seed = Long.parseLong(seedString);
+
+        // 使用种子创建随机生成器
+        Random random = new Random(seed);
+
+        // 生成随机世界
+        World world = new World();
+        world.generateRooms(random); // 随机生成5-15个房间
+
+        // 返回生成的世界
+        return world.getWorld();
 
     }
 
