@@ -32,8 +32,7 @@ public class AutograderBuddy {
         Random random = new Random(seed);
 
         // 生成随机世界
-        World world = new World();
-        world.generateRooms(random); // 随机生成5-15个房间
+        World world = new World(random);
 
         // 返回生成的世界
         return world.getWorld();

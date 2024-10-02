@@ -14,23 +14,68 @@ public class World {
     private static final int HEIGHT = 30; // 定义世界高度
     private final TETile[][] world;  // 世界的二维网格
     private List<Room> rooms = new ArrayList<>(); // 房间
+    private int avatarX; // 记录avatar的坐标
+    private int avatarY;
 
-    public World() {
+    public World(Random random) {
         world = new TETile[WIDTH][HEIGHT];  // 创建网格
-        initializeWorld();  // 初始化世界
+        initializeWorld(random);  // 初始化世界
     }
 
-    // 初始化世界，将所有网格设置为空地
-    private void initializeWorld() {
+    // 初始化世界，将所有网格设置为空地，初始化avatar，生成房间
+    private void initializeWorld(Random random) {
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 world[x][y] = Tileset.NOTHING;  // 将每个格子初始化
             }
         }
+
+        // 生成房间
+        generateRooms(random);
+
+        // 初始化avatar
+        placeAvatar(random);
     }
 
+    // 初始化avatar
+    private void placeAvatar(Random random) {
+        boolean placed = false;
+        while (!placed) {
+            avatarX = RandomUtils.uniform(random, 0, WIDTH);
+            avatarY = RandomUtils.uniform(random, 0, HEIGHT);
+            if (world[avatarX][avatarY] == Tileset.FLOOR) {
+                world[avatarX][avatarY] = Tileset.AVATAR; // 将avatar放在初始位置
+                placed = true;
+            }
+        }
+    }
+
+    public void moveAvatar(char direction) {
+        int newX = avatarX;
+        int newY = avatarY;
+
+        // 不区分大小写，将输入字符统一转换为小写
+        direction = Character.toLowerCase(direction);
+
+        switch (direction) {
+            case 'w': newY += 1; break;
+            case 'a': newX -= 1; break;
+            case 's': newY -= 1; break;
+            case 'd': newX += 1; break;
+        }
+
+        // 检查是否为FLOOR
+        if (world[newX][newY] == Tileset.FLOOR) {
+            world[avatarX][avatarY] = Tileset.FLOOR; // 重置之前位置
+            avatarX = newX;
+            avatarY = newY;
+            world[avatarX][avatarY] = Tileset.AVATAR; // 更新avatar位置
+        }
+    }
+
+
     // 生成多个房间
-    public void generateRooms(Random random) {
+    private void generateRooms(Random random) {
         double fillRatio = 0.0;
         while (fillRatio < 0.5) {
             addRandomRoom(random);  // 随机生成房间
