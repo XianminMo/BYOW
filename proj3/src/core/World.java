@@ -13,7 +13,7 @@ public class World {
     private static final int WIDTH = 80;  // 定义世界宽度
     private static final int HEIGHT = 30; // 定义世界高度
     private final TETile[][] world;  // 世界的二维网格
-    private List<Room> rooms = new ArrayList<>(); // 房间
+    private final List<Room> rooms = new ArrayList<>(); // 房间
     private int avatarX; // 记录avatar的坐标
     private int avatarY;
 
@@ -81,7 +81,7 @@ public class World {
             addRandomRoom(random);  // 随机生成房间
             fillRatio = calculateFillRatio();  // 计算填充率
         }
-        connectRoomsUsingMST();  // 连接房间
+        connectRoomsUsingMST(random);  // 连接房间
     }
 
     // 计算当前世界的填充率
@@ -115,7 +115,7 @@ public class World {
     }
 
     // 随机生成房间并添加到世界
-    public void addRandomRoom(Random random) {
+    private void addRandomRoom(Random random) {
         int x = 0;
         int y = 0;
         int roomWidth = 0;
@@ -165,7 +165,7 @@ public class World {
 
 
     // 使用最小生成树算法连接房间 -- Kruskal
-    private void connectRoomsUsingMST() {
+    private void connectRoomsUsingMST(Random random) {
         PriorityQueue<Edge> edges = new PriorityQueue<>(Comparator.comparingInt(e -> e.distance));
         for (int i = 0; i < rooms.size(); i++) {
             for (int j = i + 1; j < rooms.size(); j++) {
@@ -184,16 +184,16 @@ public class World {
             if (uf.union(edge.room1, edge.room2)) {
                 Room room1 = rooms.get(edge.room1);
                 Room room2 = rooms.get(edge.room2);
-                connectTwoRooms(room1, room2);
+                connectTwoRooms(room1, room2, random);
             }
         }
     }
 
     // 连接两个房间
-    private void connectTwoRooms(Room room1, Room room2) {
+    private void connectTwoRooms(Room room1, Room room2, Random random) {
         // 随机选择房间的连接点，可以是角点、中心或边界中点
-        int[] room1Pos = chooseRandomPosition(room1);
-        int[] room2Pos = chooseRandomPosition(room2);
+        int[] room1Pos = chooseRandomPosition(room1, random);
+        int[] room2Pos = chooseRandomPosition(room2, random);
 
         int startX = room1Pos[0];
         int startY = room1Pos[1];
@@ -218,7 +218,7 @@ public class World {
         if (world[x + 1][y] == Tileset.NOTHING) world[x + 1][y] = Tileset.WALL;
     }
 
-    private int[] chooseRandomPosition(Room room) {
+    private int[] chooseRandomPosition(Room room, Random random) {
         int x1 = room.getPosition()[0];
         int y1 = room.getPosition()[1];
         int x2 = x1 + room.getSize()[0] - 1;
@@ -235,7 +235,6 @@ public class World {
                 {x1, (y1 + y2) / 2},          // 左边中点
                 {x2, (y1 + y2) / 2}           // 右边中点
         };
-        Random random = new Random();
         return positions[random.nextInt(positions.length)];
     }
 
@@ -243,5 +242,13 @@ public class World {
     // 返回世界
     public TETile[][] getWorld() {
         return world;
+    }
+
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    public int getHeight() {
+        return HEIGHT;
     }
 }
