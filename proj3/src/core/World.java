@@ -10,6 +10,9 @@ import utils.UnionFind;
 import java.util.*;
 
 public class World {
+    /*
+        世界显示的时候以左下角为坐标原点，横轴为x轴，纵轴为y轴，在数组中行代表横轴，列代表纵轴，原点在左上角，与显示画面有一定出入，需要注意！！！
+    */
     private static final int WIDTH = 80;  // 定义世界宽度
     private static final int HEIGHT = 30; // 定义世界高度
     private final TETile[][] world;  // 世界的二维网格
@@ -250,5 +253,13 @@ public class World {
 
     public int getHeight() {
         return HEIGHT;
+    }
+
+    public int getAvatarX() {
+        return avatarX;
+    }
+
+    public int getAvatarY() {
+        return avatarY;
     }
 }

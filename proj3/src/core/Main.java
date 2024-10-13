@@ -4,6 +4,7 @@ import org.apache.bcel.generic.IF_ACMPEQ;
 import org.apache.bcel.generic.NEW;
 import tileengine.TERenderer;
 import tileengine.TETile;
+import utils.FileUtils;
 
 import javax.management.relation.RelationNotification;
 import java.awt.*;
@@ -52,8 +53,21 @@ public class Main {
         StdDraw.show();
     }
 
-    private void saveGame(World world, Random random) {
+    private void saveGame(World world, long seedValue) {
+        StringBuilder gameState = new StringBuilder();
 
+        // 保存用于初始化随机数生成器的种子
+        gameState.append(seedValue).append("\n");
+
+        // 保存avatar的位置
+        gameState.append(world.getAvatarX()).append(" ").append(world.getAvatarY()).append("\n");
+
+        // 保存世界的TETile二维数组
+        gameState.append(TETile.toString(world.getWorld()));
+
+        // 使用FileUtils写入文件
+        FileUtils.writeFile("savegame.txt", gameState.toString());
+        System.out.println("游戏已保存到 savegame.txt");
     }
 
     private void loadGame() {
@@ -116,11 +130,11 @@ public class Main {
         ter.renderFrame(worldTiles);
 
         // 操作avatar
-        processInput(world, ter, random);
+        processInput(world, ter, seedValue);
     }
 
     // 处理输入，显示tile类型
-    private void processInput(World world, TERenderer ter, Random random) {
+    private void processInput(World world, TERenderer ter, long seedValue) {
         StringBuilder command = new StringBuilder();  // 用于存储所有用户的输入
 
         while (true) {
@@ -132,7 +146,7 @@ public class Main {
                 // 处理命令输入
                 // 检查输入的最后两个字符是否是 ":Q" 或 ":q"
                 if (command.length() >= 2 && (command.substring(command.length() - 2).equals(":q") || command.substring(command.length() - 2).equals(":Q"))) {
-                    saveGame(world, random);
+                    saveGame(world, seedValue);
                     System.exit(0);
                 } else {
                     world.moveAvatar(key);
