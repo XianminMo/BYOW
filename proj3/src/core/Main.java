@@ -1,5 +1,6 @@
 package core;
 import edu.princeton.cs.algs4.StdDraw;
+import org.apache.bcel.generic.FieldOrMethod;
 import org.apache.bcel.generic.IF_ACMPEQ;
 import org.apache.bcel.generic.NEW;
 import tileengine.TERenderer;
@@ -8,6 +9,7 @@ import utils.FileUtils;
 
 import javax.management.relation.RelationNotification;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Main {
@@ -71,6 +73,35 @@ public class Main {
     }
 
     private void loadGame() {
+        if (!FileUtils.fileExists("savegame.txt")) {
+            System.out.println("没有找到保存的游戏文件。");
+            System.exit(0);  // 如果没有找到保存文件，退出游戏
+        }
+
+        // 读取文件内容
+        String content = FileUtils.readFile("savegame.txt");
+        String[] lines = content.split("\n");
+
+        // 恢复用于初始化随机数生成器的种子
+        long seed = Long.parseLong(lines[0]);
+        Random random = new Random(seed);
+
+        // 获取原先avatar的位置
+        String[] avatarPosition = lines[1].split(" ");
+        int avatarX = Integer.parseInt(avatarPosition[0]);
+        int avatarY = Integer.parseInt(avatarPosition[1]);
+
+        // 恢复世界
+        World world = new World(random);
+        world.setAvatarPosition(avatarX, avatarY);
+
+        // 渲染加载的世界
+        TERenderer ter = new TERenderer();
+        ter.initialize(80, 30);
+        ter.renderFrame(world.getWorld());
+
+        // 继续处理输入
+        processInput(world, ter, seed);
     }
 
     // 处理种子输入并在菜单上动态显示

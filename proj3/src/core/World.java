@@ -46,9 +46,27 @@ public class World {
         while (!placed) {
             avatarX = RandomUtils.uniform(random, 0, WIDTH);
             avatarY = RandomUtils.uniform(random, 0, HEIGHT);
-            if (world[avatarX][avatarY] == Tileset.FLOOR) {
+            if (world[avatarX][avatarY].equals(Tileset.FLOOR)) {
                 world[avatarX][avatarY] = Tileset.AVATAR; // 将avatar放在初始位置
                 placed = true;
+            }
+        }
+    }
+
+    // 设置avatar位置
+    public void setAvatarPosition(int avatarX, int avatarY) {
+        clearAvatar();
+        this.avatarX = avatarX;
+        this.avatarY = avatarY;
+        world[avatarX][avatarY] = Tileset.AVATAR;
+    }
+
+    private void clearAvatar() {
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                if (world[x][y].equals(Tileset.AVATAR)) {
+                    world[x][y] = Tileset.FLOOR;
+                }
             }
         }
     }
