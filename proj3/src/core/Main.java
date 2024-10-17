@@ -147,6 +147,7 @@ public class Main {
         }
     }
 
+    // 随机开始一个新的游戏
     private void startNewGame(long seedValue) {
         // 初始化渲染器，设置世界大小
         TERenderer ter = new TERenderer();
@@ -165,7 +166,7 @@ public class Main {
     }
 
     // 处理输入，显示tile类型
-    private void processInput(World world, TERenderer ter, long seedValue) {
+    public void processInput(World world, TERenderer ter, long seedValue) {
         StringBuilder command = new StringBuilder();  // 用于存储所有用户的输入
 
         while (true) {

@@ -18,11 +18,17 @@ public class WorldGenTests {
 
     @Test
     public void basicInteractivityTest() {
-        // TODO: write a test that uses an input like "n123swasdwasd"
+        TETile[][] tiles = AutograderBuddy.getWorldFromInput("n123swasdwasd");
+
+        TERenderer ter = new TERenderer();
+        ter.initialize(tiles.length, tiles[0].length);
+        ter.renderFrame(tiles);
+        StdDraw.pause(5000); // pause for 5 seconds so you can see the output
     }
 
     @Test
     public void basicSaveTest() {
         // TODO: write a test that calls getWorldFromInput twice, with "n123swasd:q" and with "lwasd"
+
     }
 }

@@ -53,7 +53,7 @@ public class World {
         }
     }
 
-    // 设置avatar位置
+    // 设置avatar位置，在加载存档游戏时使用
     public void setAvatarPosition(int avatarX, int avatarY) {
         clearAvatar();
         this.avatarX = avatarX;
@@ -61,6 +61,7 @@ public class World {
         world[avatarX][avatarY] = Tileset.AVATAR;
     }
 
+    // 在设置avatar位置时，将随机生成的avatar先清除
     private void clearAvatar() {
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
@@ -71,6 +72,7 @@ public class World {
         }
     }
 
+    // 根据键盘输入移动avatar
     public void moveAvatar(char direction) {
         int newX = avatarX;
         int newY = avatarY;
@@ -95,14 +97,14 @@ public class World {
     }
 
 
-    // 生成多个房间
+    // 生成多个房间并使用最小生成树连接
     private void generateRooms(Random random) {
         double fillRatio = 0.0;
         while (fillRatio < 0.5) {
             addRandomRoom(random);  // 随机生成房间
             fillRatio = calculateFillRatio();  // 计算填充率
         }
-        connectRoomsUsingMST(random);  // 连接房间
+        connectRoomsUsingMST(random);  // 连接房间，使用最小生成树
     }
 
     // 计算当前世界的填充率
